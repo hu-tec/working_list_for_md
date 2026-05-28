@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>작업 Markdown 목록</title>
+  <style>
+    :root {
+      --ds-color-text-primary: #222222;
+      --ds-color-text-secondary: #666666;
+      --ds-color-text-muted: #808080;
+      --ds-color-text-inverse: #ffffff;
+      --ds-color-brand-primary: #0088ff;
+      --ds-color-brand-primary-strong: #006dcc;
+      --ds-color-bg-base: #ffffff;
+      --ds-color-bg-page: #f8f9fc;
+      --ds-color-bg-sidebar: #eff0fa;
+      --ds-color-bg-info-soft: #e7f2ff;
+      --ds-color-bg-selected: #d7e7fc;
+      --ds-color-border-default: #e3e5ed;
+      --ds-color-border-strong: #cccccc;
+      --ds-radius-sm: 4px;
+      --ds-radius-md: 6px;
+      --ds-radius-full: 20px;
+      --ds-font-family: "Noto Sans KR", "Pretendard", "Apple SD Gothic Neo", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--ds-color-bg-page);
+      color: var(--ds-color-text-primary);
+      font-family: var(--ds-font-family);
+      font-size: 14px;
+      line-height: 1.571;
+      letter-spacing: -0.02em;
+    }
+
+    button,
+    input {
+      font: inherit;
+      letter-spacing: inherit;
+    }
+
+    button { cursor: pointer; }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      width: 280px;
+      height: 100vh;
+      padding: 30px 24px;
+      border-right: 1px solid var(--ds-color-border-default);
+      background: var(--ds-color-bg-base);
+    }
+
+    .nav h1 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      line-height: 28px;
+    }
+
+    .nav p {
+      margin: 0 0 18px;
+      color: var(--ds-color-text-muted);
+      font-size: 12px;
+      line-height: 18px;
+    }
+
+    .nav-scroll {
+      display: grid;
+      gap: 8px;
+      max-height: calc(100vh - 116px);
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .nav-category {
+      display: grid;
+      gap: 2px;
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: var(--ds-radius-md);
+      background: transparent;
+      padding: 11px 12px;
+      color: var(--ds-color-text-primary);
+      text-align: left;
+    }
+
+    .nav-category strong {
+      font-size: 14px;
+      line-height: 20px;
+    }
+
+    .nav-category span {
+      color: var(--ds-color-text-muted);
+      font-size: 12px;
+      line-height: 18px;
+    }
+
+    .nav-category:hover,
+    .nav-category.active,
+    .nav-category[aria-pressed="true"] {
+      border-color: #b8d8f8;
+      background: var(--ds-color-bg-info-soft);
+    }
+
+    .nav-category.active strong,
+    .nav-category[aria-pressed="true"] strong {
+      color: var(--ds-color-brand-primary-strong);
+    }
+
+    main {
+      width: calc(100vw - 280px);
+      padding: 0 56px 80px;
+    }
+
+    .section-tabs-shell {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      margin: 0 -56px 40px;
+      border-bottom: 1px solid var(--ds-color-border-default);
+      background: rgba(248, 249, 252, 0.96);
+      padding: 14px 56px;
+      backdrop-filter: blur(8px);
+    }
+
+    .section-tabs {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      overflow-x: auto;
+    }
+
+    .section-tabs button {
+      display: inline-flex;
+      align-items: center;
+      flex: 0 0 auto;
+      min-height: 34px;
+      border: 1px solid var(--ds-color-border-default);
+      border-radius: var(--ds-radius-full);
+      background: var(--ds-color-bg-base);
+      padding: 6px 12px;
+      color: var(--ds-color-text-secondary);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .section-tabs button.active,
+    .section-tabs button[aria-pressed="true"] {
+      border-color: #b8d8f8;
+      background: var(--ds-color-bg-info-soft);
+      color: var(--ds-color-brand-primary-strong);
+    }
+
+    section { margin-bottom: 56px; }
+
+    .section-head {
+      margin-bottom: 20px;
+    }
+
+    .section-head h2 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      line-height: 32px;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--ds-color-text-muted);
+    }
+
+    .panel {
+      border: 1px solid var(--ds-color-border-default);
+      border-radius: var(--ds-radius-md);
+      background: var(--ds-color-bg-base);
+      padding: 20px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .summary-card {
+      border: 1px solid var(--ds-color-border-default);
+      border-radius: var(--ds-radius-md);
+      background: var(--ds-color-bg-base);
+      padding: 16px;
+    }
+
+    .summary-card strong {
+      display: block;
+      font-size: 24px;
+      line-height: 30px;
+    }
+
+    .summary-card span {
+      color: var(--ds-color-text-muted);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .search {
+      width: 360px;
+      max-width: 100%;
+      height: 34px;
+      border: 1px solid var(--ds-color-border-default);
+      border-radius: var(--ds-radius-sm);
+      background: #fff;
+      padding: 0 10px;
+    }
+    .table-wrapper{
+      display:flex;
+      gap:12px;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      max-width: 100%;
+      padding-bottom: 4px;
+    }
+
+    .md-table {
+      width: 100%;
+      min-width: 200px;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+    }
+
+    .md-table th {
+      color: var(--ds-color-text-secondary);
+      font-size: 12px;
+      font-weight: 400;
+      text-align: left;
+      padding: 0 10px 2px;
+    }
+
+    .md-table td {
+      background: var(--ds-color-bg-base);
+      border-top: 1px solid var(--ds-color-border-default);
+      border-bottom: 1px solid var(--ds-color-border-default);
+      padding: 10px;
+      vertical-align: middle;
+    }
+
+    .md-table td:first-child {
+      border-left: 1px solid var(--ds-color-border-default);
+      border-radius: 6px 0 0 6px;
+      text-align: center;
+      color: var(--ds-color-text-muted);
+      width: 54px;
+    }
+
+    .md-table td:last-child {
+      border-right: 1px solid var(--ds-color-border-default);
+      border-radius: 0 6px 6px 0;
+      width: 100px;
+      white-space: nowrap;
+    }
+
+    .md-table tr:hover td,
+    .md-table tr.active td {
+      background: var(--ds-color-bg-info-soft);
+      border-color: #b8d8f8;
+    }
+
+    .doc-title {
+      display: block;
+      font-weight: 700;
+      line-height: 20px;
+    }
+
+    .doc-path {
+      display: block;
+      margin-top: 2px;
+      color: var(--ds-color-text-muted);
+      font-size: 12px;
+      line-height: 18px;
+      word-break: break-all;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 68px;
+      height: 26px;
+      border-radius: var(--ds-radius-full);
+      background: var(--ds-color-bg-info-soft);
+      color: var(--ds-color-brand-primary-strong);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+      border: 1px solid var(--ds-color-border-default);
+      border-radius: var(--ds-radius-sm);
+      background: #fff;
+      padding: 5px 10px;
+      color: var(--ds-color-text-secondary);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .btn.primary {
+      border-color: var(--ds-color-brand-primary);
+      background: var(--ds-color-brand-primary);
+      color: var(--ds-color-text-inverse);
+    }
+
+    .viewer {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      width : calc(100% - 400px);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .viewer-head {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--ds-color-border-default);
+      padding-bottom: 14px;
+    }
+
+    .viewer-head h3 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 26px;
+    }
+
+    .viewer-path {
+      color: var(--ds-color-text-muted);
+      font-size: 12px;
+      line-height: 18px;
+      word-break: break-all;
+    }
+
+    .viewer-actions {
+      display: flex;
+      flex: 0 0 auto;
+      gap: 8px;
+    }
+
+    .viewer-body {
+      max-height: 68vh;
+      min-height: 320px;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .empty,
+    .notice {
+      border: 1px solid var(--ds-color-border-default);
+      border-radius: var(--ds-radius-md);
+      background: #fbfcff;
+      padding: 14px;
+      color: var(--ds-color-text-secondary);
+    }
+
+    .markdown h1,
+    .markdown h2,
+    .markdown h3 {
+      margin: 22px 0 10px;
+      line-height: 1.35;
+    }
+
+    .markdown h1 { font-size: 24px; }
+    .markdown h2 {
+      border-bottom: 1px solid var(--ds-color-border-default);
+      padding-bottom: 6px;
+      font-size: 20px;
+    }
+    .markdown h3 { font-size: 17px; }
+    .markdown p { margin: 10px 0; }
+    .markdown ul { padding-left: 22px; }
+
+    .markdown code {
+      border-radius: 4px;
+      background: var(--ds-color-bg-page);
+      padding: 2px 5px;
+      color: var(--ds-color-brand-primary);
+      font-family: Consolas, Monaco, monospace;
+      font-size: 12px;
+      letter-spacing: 0;
+    }
+
+    .markdown pre {
+      overflow: auto;
+      border: 1px solid var(--ds-color-border-default);
+      border-radius: var(--ds-radius-md);
+      background: #fbfcff;
+      padding: 14px;
+      color: #2c2c2e;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      letter-spacing: 0;
+      white-space: pre;
+    }
+
+    .markdown pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    .markdown table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+      margin: 14px 0;
+    }
+
+    .markdown th {
+      color: var(--ds-color-text-secondary);
+      font-size: 12px;
+      font-weight: 400;
+      text-align: left;
+      padding: 0 10px 2px;
+    }
+
+    .markdown td {
+      background: var(--ds-color-bg-base);
+      border-top: 1px solid var(--ds-color-border-default);
+      border-bottom: 1px solid var(--ds-color-border-default);
+      padding: 10px;
+      vertical-align: top;
+    }
+
+    .markdown td:first-child {
+      border-left: 1px solid var(--ds-color-border-default);
+      border-radius: 6px 0 0 6px;
+    }
+
+    .markdown td:last-child {
+      border-right: 1px solid var(--ds-color-border-default);
+      border-radius: 0 6px 6px 0;
+    }
+
+    @media (max-width: 960px) {
+      .shell { display: block; }
+      .nav {
+        position: static;
+        width: auto;
+        height: auto;
+      }
+      main {
+        width: auto;
+        padding: 0 20px 56px;
+      }
+      .section-tabs-shell {
+        margin: 0 -20px 28px;
+        padding: 14px 20px;
+      }
+      .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toolbar,
+      .viewer-head {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .search { width: 100%; }
+      .viewer-actions { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav class="nav" aria-label="문서 분류">
+      <h1>작업 Markdown 목록</h1>
+      <p>현재 작업 폴더에 정리된 MD 문서만 모았습니다.</p>
+      <div class="nav-scroll" id="categoryNav"></div>
+    </nav>
+
+    <main>
+      <div class="section-tabs-shell">
+        <div class="section-tabs" id="folderTabs" aria-label="폴더 필터"></div>
+      </div>
+
+      <section>
+        <div class="section-head">
+          <h2>문서 테이블</h2>
+          <p>문서명을 누르면 아래 미리보기 영역에서 Markdown을 바로 확인할 수 있습니다.</p>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-card"><strong id="totalCount">0</strong><span>전체 MD</span></div>
+          <div class="summary-card"><strong id="folderCount">0</strong><span>폴더 수</span></div>
+          <div class="summary-card"><strong id="visibleCount">0</strong><span>현재 표시</span></div>
+          <div class="summary-card"><strong>MD</strong><span>열람 형식</span></div>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar">
+            <input class="search" id="searchInput" type="search" placeholder="문서명, 폴더명, 경로 검색" autocomplete="off">
+            <span class="badge" id="activeFolderLabel">전체</span>
+          </div>
+        <div class="table-wrapper">
+            <div class="table-scroll">
+              <table class="md-table">
+                <thead>
+                  <tr>
+                    <th>번호</th>
+                    <th>폴더</th>
+                  </tr>
+                </thead>
+                <tbody id="docRows"></tbody>
+              </table>
+            </div>
+
+            <div class="viewer" aria-label="Markdown 미리보기">
+              <div class="viewer-head">
+                <div>
+                  <h3 id="viewerTitle">문서를 선택하세요</h3>
+                  <div class="viewer-path" id="viewerPath">테이블에서 문서를 선택하면 이곳에 내용이 표시됩니다.</div>
+                </div>
+                <div class="viewer-actions">
+                  <a class="btn" id="rawLink" href="#" target="_blank" rel="noopener">원본 열기</a>
+                  <button class="btn" id="copyPath" type="button">경로 복사</button>
+                </div>
+              </div>
+              <div class="viewer-body" id="viewerBody">
+                <div class="empty">아직 선택된 문서가 없습니다.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./md-data.js"></script>
+  <script>
+    const docs = [
+      ["보유스킬_체크리스트", "skill-checklist-restructure_ver_2.md"],
+      ["타임테솔_faq", "itt-ai-expected-faq.md"],
+      ["타임테솔_faq", "itt-faq.md"],
+      ["타임테솔_faq", "times-tesol-faq.md"],
+      ["타임테솔_faq", "times-translation-faq.md"],
+      ["타임테솔_관리자통합", "01-hutechc-internal-studio-analysis.md"],
+      ["타임테솔_관리자통합", "02-timesmedia-intranet-analysis.md"],
+      ["타임테솔_관리자통합", "03-work-studio-analysis.md"],
+      ["타임테솔_관리자통합", "04-integrated-platform-strategy.md"],
+      ["휴텍씨DB정제", "00_문서목록_및_읽는법.md"],
+      ["휴텍씨DB정제", "99_생성검증결과.md"],
+      ["휴텍씨_피그마_분석", "2024_figma_사이트맵_기능정의.md"],
+      ["휴텍씨_피그마_분석", "figma_pdf_2025_사이트맵_기능정의.md"],
+      ["휴텍씨_피그마_분석", "vibecoding_화면분석_쉬운설명.md"],
+      ["휴텍씨_피그마_분석", "시험플랫폼_관점_2024_2025_vibecoding_해석.md"]
+    ].map(([folder, file]) => ({
+      folder,
+      file,
+      title: file.replace(/\.md$/i, "").replaceAll("_", " "),
+      path: `${folder}/${file}`
+    }));
+
+    const state = {
+      folder: "전체",
+      query: "",
+      selectedPath: ""
+    };
+
+    const categoryNav = document.getElementById("categoryNav");
+    const folderTabs = document.getElementById("folderTabs");
+    const docRows = document.getElementById("docRows");
+    const searchInput = document.getElementById("searchInput");
+    const activeFolderLabel = document.getElementById("activeFolderLabel");
+    const viewerTitle = document.getElementById("viewerTitle");
+    const viewerPath = document.getElementById("viewerPath");
+    const viewerBody = document.getElementById("viewerBody");
+    const rawLink = document.getElementById("rawLink");
+    const copyPath = document.getElementById("copyPath");
+    const folders = ["전체", ...new Set(docs.map((doc) => doc.folder))];
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function inlineMarkdown(value) {
+      return escapeHtml(value)
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    }
+
+    function parseMarkdownTable(lines, startIndex) {
+      const tableLines = [];
+      let index = startIndex;
+      while (index < lines.length && /^\s*\|.+\|\s*$/.test(lines[index])) {
+        tableLines.push(lines[index]);
+        index += 1;
+      }
+
+      if (tableLines.length < 2 || !/^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(tableLines[1])) {
+        return null;
+      }
+
+      const rows = tableLines
+        .filter((_, rowIndex) => rowIndex !== 1)
+        .map((line) => line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim()));
+      const head = rows.shift() || [];
+      const body = rows;
+
+      return {
+        nextIndex: index,
+        html: [
+          "<table><thead><tr>",
+          ...head.map((cell) => `<th>${inlineMarkdown(cell)}</th>`),
+          "</tr></thead><tbody>",
+          ...body.map((row) => `<tr>${row.map((cell) => `<td>${inlineMarkdown(cell)}</td>`).join("")}</tr>`),
+          "</tbody></table>"
+        ].join("")
+      };
+    }
+
+    function renderMarkdown(source) {
+      const lines = source.replace(/\r\n/g, "\n").split("\n");
+      const html = [];
+      let listOpen = false;
+      let codeOpen = false;
+      let codeBuffer = [];
+
+      function closeList() {
+        if (listOpen) {
+          html.push("</ul>");
+          listOpen = false;
+        }
+      }
+
+      for (let i = 0; i < lines.length; i += 1) {
+        const line = lines[i];
+
+        if (/^```/.test(line)) {
+          closeList();
+          if (codeOpen) {
+            html.push(`<pre><code>${escapeHtml(codeBuffer.join("\n"))}</code></pre>`);
+            codeOpen = false;
+            codeBuffer = [];
+          } else {
+            codeOpen = true;
+          }
+          continue;
+        }
+
+        if (codeOpen) {
+          codeBuffer.push(line);
+          continue;
+        }
+
+        if (/^\s*\|.+\|\s*$/.test(line)) {
+          const table = parseMarkdownTable(lines, i);
+          if (table) {
+            closeList();
+            html.push(table.html);
+            i = table.nextIndex - 1;
+            continue;
+          }
+        }
+
+        if (/^###\s+/.test(line)) {
+          closeList();
+          html.push(`<h3>${inlineMarkdown(line.replace(/^###\s+/, ""))}</h3>`);
+        } else if (/^##\s+/.test(line)) {
+          closeList();
+          html.push(`<h2>${inlineMarkdown(line.replace(/^##\s+/, ""))}</h2>`);
+        } else if (/^#\s+/.test(line)) {
+          closeList();
+          html.push(`<h1>${inlineMarkdown(line.replace(/^#\s+/, ""))}</h1>`);
+        } else if (/^\s*-\s+/.test(line)) {
+          if (!listOpen) {
+            html.push("<ul>");
+            listOpen = true;
+          }
+          html.push(`<li>${inlineMarkdown(line.replace(/^\s*-\s+/, ""))}</li>`);
+        } else if (line.trim() === "") {
+          closeList();
+        } else {
+          closeList();
+          html.push(`<p>${inlineMarkdown(line)}</p>`);
+        }
+      }
+
+      closeList();
+      if (codeOpen) {
+        html.push(`<pre><code>${escapeHtml(codeBuffer.join("\n"))}</code></pre>`);
+      }
+
+      return `<div class="markdown">${html.join("")}</div>`;
+    }
+
+    function getVisibleDocs() {
+      const query = state.query.trim().toLowerCase();
+      return docs.filter((doc) => {
+        const matchesFolder = state.folder === "전체" || doc.folder === state.folder;
+        const text = `${doc.folder} ${doc.file} ${doc.title} ${doc.path}`.toLowerCase();
+        return matchesFolder && (!query || text.includes(query));
+      });
+    }
+
+    function setFolder(folder) {
+      state.folder = folder;
+      activeFolderLabel.textContent = folder;
+      renderNav();
+      renderTabs();
+      renderRows();
+    }
+
+    function renderNav() {
+      categoryNav.innerHTML = folders.map((folder) => {
+        const count = folder === "전체" ? docs.length : docs.filter((doc) => doc.folder === folder).length;
+        const active = folder === state.folder;
+        return `
+          <button class="nav-category ${active ? "active" : ""}" type="button" data-folder="${escapeHtml(folder)}" aria-pressed="${active}">
+            <strong>${escapeHtml(folder)}</strong>
+            <span>${count}개 Markdown</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderTabs() {
+      folderTabs.innerHTML = folders.map((folder) => {
+        const active = folder === state.folder;
+        return `<button class="${active ? "active" : ""}" type="button" data-folder="${escapeHtml(folder)}" aria-pressed="${active}">${escapeHtml(folder)}</button>`;
+      }).join("");
+    }
+
+    function renderRows() {
+      const visibleDocs = getVisibleDocs();
+      document.getElementById("visibleCount").textContent = visibleDocs.length;
+
+      docRows.innerHTML = visibleDocs.map((doc, index) => `
+        <tr class="${state.selectedPath === doc.path ? "active" : ""}" data-path="${escapeHtml(doc.path)}">
+          <td>${index + 1}</td>
+          <td>
+            <span class="doc-path">${escapeHtml(doc.path)}</span>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    async function openDoc(path) {
+      const doc = docs.find((item) => item.path === path);
+      if (!doc) return;
+
+      state.selectedPath = path;
+      renderRows();
+      viewerTitle.textContent = doc.title;
+      viewerPath.textContent = doc.path;
+      rawLink.href = encodeURI(doc.path);
+      copyPath.dataset.path = doc.path;
+      viewerBody.innerHTML = '<div class="empty">문서를 불러오는 중입니다.</div>';
+
+      if (window.MD_CONTENTS && window.MD_CONTENTS[doc.path]) {
+        viewerBody.innerHTML = renderMarkdown(window.MD_CONTENTS[doc.path]);
+        return;
+      }
+
+      try {
+        const response = await fetch(encodeURI(doc.path), { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const text = await response.text();
+        viewerBody.innerHTML = renderMarkdown(text);
+      } catch (error) {
+        viewerBody.innerHTML = `
+          <div class="notice">
+            미리보기 데이터를 찾지 못했습니다.<br>
+            <code>md-data.js</code>가 <code>index.html</code>과 같은 폴더에 있는지 확인하세요.
+          </div>
+        `;
+      }
+    }
+
+    categoryNav.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-folder]");
+      if (button) setFolder(button.dataset.folder);
+    });
+
+    folderTabs.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-folder]");
+      if (button) setFolder(button.dataset.folder);
+    });
+
+    docRows.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-open]");
+      const row = event.target.closest("[data-path]");
+      const path = button ? button.dataset.open : row?.dataset.path;
+      if (path) openDoc(path);
+    });
+
+    searchInput.addEventListener("input", (event) => {
+      state.query = event.target.value;
+      renderRows();
+    });
+
+    copyPath.addEventListener("click", async () => {
+      const path = copyPath.dataset.path;
+      if (!path) return;
+
+      try {
+        await navigator.clipboard.writeText(path);
+        copyPath.textContent = "복사됨";
+        window.setTimeout(() => { copyPath.textContent = "경로 복사"; }, 1200);
+      } catch {
+        window.prompt("경로를 복사하세요.", path);
+      }
+    });
+
+    document.getElementById("totalCount").textContent = docs.length;
+    document.getElementById("folderCount").textContent = folders.length - 1;
+    renderNav();
+    renderTabs();
+    renderRows();
+    openDoc("타임테솔_관리자통합/04-integrated-platform-strategy.md");
+  </script>
+</body>
+</html>
